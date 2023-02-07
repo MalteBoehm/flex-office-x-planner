@@ -4,13 +4,21 @@ import { api } from "../utils/api";
 
 export default function Table() {
   const { data, status } = api.firestore.getWeek.useQuery();
+  const mutation = api.firestore.createTable.useMutation();
   if (status === "loading") return <div>Loading...</div>;
   if (status === "error") return <div>Error</div>;
+
+  const handle = () => {
+    mutation.mutate();
+  };
 
   return (
     <>
       {data.length == 0 && (
-        <button className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20">
+        <button
+          onClick={handle}
+          className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+        >
           Create Week
         </button>
       )}

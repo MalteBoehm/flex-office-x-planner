@@ -1,8 +1,8 @@
-import { collection, getDocs } from "firebase/firestore/lite";
+import { randomUUID } from "crypto";
+import { addDoc, collection, getDocs } from "firebase/firestore/lite";
 import { z } from "zod";
 import { db } from "../../../firebase";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-
 const Arbeitswoche = z.object({
   id: z.string(),
   kalenderwoche: z.number(),
@@ -22,5 +22,23 @@ export const fireStoreRouter = createTRPCRouter({
     const weeksSnapshot = await getDocs(week);
     const daysList = weeksSnapshot.docs.map((doc) => doc.data());
     return Arbeitswochen.parse(daysList);
+  }),
+  createTable: publicProcedure.mutation(async () => {
+    const week = collection(db, "week");
+    const weeksSnapshot = await getDocs(week);
+
+    const date = new Date();
+    const currentWeek = 6;
+    const newWeek: Arbeitswoche = {
+      id: randomUUID(),
+      montagBesucherIds: [],
+      dienstagBesucherIds: [],
+      mittwochBesucherIds: [],
+      donnerstagBesucherIds: [],
+      freitagBesucherIds: [],
+
+      kalenderwoche: currentWeek,
+    };
+    await addDoc(week, newWeek);
   }),
 });
