@@ -12,6 +12,6 @@ export const exampleRouter = createTRPCRouter({
     }),
 
   getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
+    return "Welcome to Flex Office X Planner!";
   }),
 });
