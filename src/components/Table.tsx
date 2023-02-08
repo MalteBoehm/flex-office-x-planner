@@ -39,9 +39,9 @@ export default function Table() {
 
               const key: ArbeitsWocheKey = (e.toLowerCase() +
                 "BesucherIds") as ArbeitsWocheKey;
-              const userIds = data[0][key] ?? [];
+              const userIds = data[0]![key] ?? [];
               console.log(key);
-              return <Tag key={i} name={e} userIds={userIds} />;
+              return <Tag key={i} name={e} userIds={userIds as string[]} />;
             })}
           </div>
         </div>
