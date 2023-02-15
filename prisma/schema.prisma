@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  members     TeamMember[]
+  attendances Attendance[]
+}
+
+model TeamMember {
+  id          String       @id @default(cuid())
+  name        String?
+  image       String?
+  email       String?
+  teamId      String
+  team        Team?        @relation(fields: [teamId], references: [id])
+  attendances Attendance[]
+
+  @@index([teamId])
+}
+
+model Attendance {
+  id           String     @id @default(cuid())
+  day          DateTime
+  teamId       String?
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id])
+  team         Team?      @relation(fields: [teamId], references: [id])
+  teamMemberId String
+
+  @@index([teamMemberId])
+  @@index([teamId])
+}
+
+model AttendanceToTeamMember {
+  A String
+  B String
+
+  @@unique([A, B], map: "_AttendanceToTeamMember_AB_unique")
+  @@index([B], map: "_AttendanceToTeamMember_B_index")
+  @@map("_AttendanceToTeamMember")
+}
