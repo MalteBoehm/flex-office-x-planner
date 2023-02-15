@@ -19,35 +19,35 @@ export default function Table() {
   const date = new Date();
   const currentYear = date.getFullYear();
   const currentWeek = getWeekNumber(date);
-
-  const [aktuelleWoche, setAktuelleWoche] = useState<number>(7);
-  const [aktuellesJahr, setAktuelleJahr] = useState<number>(2023);
-
-  const anwesenheitenMutation =
-    api.anwesenheiten.createAttendance.useMutation();
-
-  const removeAnwesenheitMutation =
-    api.anwesenheiten.removeAttendance.useMutation();
+  const [aktuelleWoche, setAktuelleWoche] = useState<number>(currentWeek);
+  const [aktuellesJahr, setAktuelleJahr] = useState<number>(currentYear);
   const {
     data: getWeek,
     remove,
     status,
-  } = api.anwesenheiten.getAttendeancesOfTeam.useQuery(
-    {
-      jahr: aktuellesJahr,
-      woche: aktuelleWoche,
-    },
-    {
-      refetchInterval: 30000,
-    }
-  );
+    refetch,
+  } = api.anwesenheiten.getAttendeancesOfTeam.useQuery({
+    jahr: aktuellesJahr,
+    woche: aktuelleWoche,
+  });
 
+  const anwesenheitenMutation = api.anwesenheiten.createAttendance.useMutation({
+    async onSuccess(data, variables, context) {
+      await refetch();
+    },
+  });
+
+  const removeAnwesenheitMutation =
+    api.anwesenheiten.removeAttendance.useMutation({
+      async onSuccess(data, variables, context) {
+        await refetch();
+      },
+    });
   const { data: isTeamMember } = api.teamMember.isTeamMember.useQuery();
 
   useEffect(() => {
     setAktuelleWoche(currentWeek);
     setAktuelleJahr(currentYear);
-    remove();
   }, [currentWeek, currentYear]);
 
   function handleZurueckWoche() {
@@ -75,14 +75,12 @@ export default function Table() {
     anwesenheitenMutation.mutate({
       day: date,
     });
-    remove();
   }
   function handleAbmelden(id: string) {
     if (id.length === 0) return;
     removeAnwesenheitMutation.mutate({
       dateId: id,
     });
-    remove();
   }
 
   switch (hasSession) {

@@ -16,15 +16,15 @@ export default function TeamsSettingsView() {
     onSuccess: () => api.teams.getTeam.useQuery(),
   });
 
-  const { data, status, refetch, remove } = api.teams.getTeam.useQuery();
+  const { data, status, refetch } = api.teams.getTeam.useQuery();
   const deleteTeam = api.teams.deleteTeam.useMutation({
-    onSuccess: () => {
-      remove();
+    onSuccess: async () => {
+      await refetch();
     },
   });
   const switchTeamMutation = api.teams.switchTeam.useMutation({
-    onSuccess: () => {
-      removeOldName();
+    onSuccess: async () => {
+      await refetch();
     },
   });
 
@@ -33,7 +33,6 @@ export default function TeamsSettingsView() {
   }
   function createTeam() {
     if (textfield.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       mutateTeam.mutate({ name: textfield });
     }
   }
