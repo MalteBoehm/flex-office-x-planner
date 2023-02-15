@@ -26,20 +26,22 @@ export default function Table() {
     remove,
     status,
     refetch,
-  } = api.anwesenheiten.getAttendeancesOfTeam.useQuery({
+  } = api.anwesenheiten.getAnwesenheitenDesTeams.useQuery({
     jahr: aktuellesJahr,
     woche: aktuelleWoche,
   });
 
-  const anwesenheitenMutation = api.anwesenheiten.createAttendance.useMutation({
-    async onSuccess(data, variables, context) {
-      await refetch();
-    },
-  });
+  const anwesenheitenMutation = api.anwesenheiten.createAnwesenheit.useMutation(
+    {
+      async onSuccess(data, variables, context) {
+        await refetch();
+      },
+    }
+  );
 
   const removeAnwesenheitMutation =
-    api.anwesenheiten.removeAttendance.useMutation({
-      async onSuccess(data, variables, context) {
+    api.anwesenheiten.anwesenheitLoeschen.useMutation({
+      async onSuccess() {
         await refetch();
       },
     });
@@ -73,13 +75,13 @@ export default function Table() {
   function handleAnwesenheit(date: Date) {
     console.log("datess" + JSON.stringify(date));
     anwesenheitenMutation.mutate({
-      day: date,
+      tag: date,
     });
   }
   function handleAbmelden(id: string) {
     if (id.length === 0) return;
     removeAnwesenheitMutation.mutate({
-      dateId: id,
+      anwesenheitId: id,
     });
   }
 
@@ -87,10 +89,7 @@ export default function Table() {
     case true:
       return isTeamMember ? (
         <>
-          {/* <TeamsSettingsView /> */}
           <div className="flex h-full min-h-min w-full flex-col gap-9 bg-white p-4">
-            {/* Es soll immer die aktuelle attendence Woche ausgeben werden, aber bei click auf Buttons vor und zurück */}
-            {/* soll die attendence Woche geändert werden */}
             <div className="flex w-full justify-between">
               <button onClick={handleZurueckWoche}>zurück</button>
               <p className="text-center">

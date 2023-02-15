@@ -24,7 +24,7 @@ const WocheMitAnwesenheiten = z.array(Anwesenheiten);
 // await ctx.prisma.teamMember.deleteMany({});
 
 export const anwesenheitenRouter = createTRPCRouter({
-  getAttendeancesOfTeam: protectedProcedure
+  getAnwesenheitenDesTeams: protectedProcedure
     .input(
       z.object({
         woche: z.number(),
@@ -32,85 +32,87 @@ export const anwesenheitenRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const member = TeamMember.parse(
+      // aktuelles Teammitglied abrufen
+      const aktuellesMitglied = TeamMember.parse(
         await ctx.prisma.teamMember.findFirst({
           where: {
             id: ctx.session.user.id,
           },
         })
       );
-      // get all teamMembers by teamId
-      const allMembers: TeamMembers = TeamMembers.parse(
+      // alle Teammitglieder des Teams abrufen
+      const alleMitgliederDesTeams: TeamMembers = TeamMembers.parse(
         await ctx.prisma.teamMember.findMany({
           where: {
-            teamId: member?.teamId,
+            teamId: aktuellesMitglied?.teamId,
           },
         })
       );
-      // teammbemrs ID is needed to get all attendances
-      const teamMemberIds = allMembers.map((member) => member.id);
-      // then get all attendances by teamMemberIds and filter by week#
-      const attendancesBy = await ctx.prisma.attendance.findMany({
+      // IDs der Teammitglieder benötigt, um Anwesenheiten abzurufen
+      const teammitgliederIds = alleMitgliederDesTeams.map(
+        (mitglied) => mitglied.id
+      );
+      // alle Anwesenheiten nach den IDs der Teammitglieder abrufen und nach Kalenderwoche filtern
+      const anwesenheiten = await ctx.prisma.attendance.findMany({
         where: {
-          teamMemberId: { in: teamMemberIds },
+          teamMemberId: { in: teammitgliederIds },
         },
       });
 
-      const workWeek = attendancesBy.map((attendance) => {
-        if (attendance) {
-          const anwesenheitPerTag: Anwesenheiten = {
-            day: attendance?.day,
-            id: attendance?.id,
-            teamId: attendance?.teamId ?? "",
-            teamMembers: TeamMembers.parse(allMembers),
+      // Anwesenheiten in Wochen- und Tag-Struktur umwandeln
+      const anwesenheitenProTag = anwesenheiten.map((anwesenheit) => {
+        if (anwesenheit) {
+          const anwesenheitProTag: Anwesenheiten = {
+            day: anwesenheit?.day,
+            id: anwesenheit?.id,
+            teamId: anwesenheit?.teamId ?? "",
+            teamMembers: TeamMembers.parse(alleMitgliederDesTeams),
           };
-          console.log("anwesenheitPerTag", anwesenheitPerTag);
-          return anwesenheitPerTag;
+          return anwesenheitProTag;
         }
       });
-      console.log("workWeek", workWeek);
-      const parsedWeeks = WocheMitAnwesenheiten.parse(
-        workWeek.map((workDay) => {
-          if (workDay) {
-            return workDay;
+      const wochenMitAnwesenheiten = WocheMitAnwesenheiten.parse(
+        anwesenheitenProTag.map((anwesenheitProTag) => {
+          if (anwesenheitProTag) {
+            return anwesenheitProTag;
           }
         })
       );
-      console.log("filteredWorkWeek", parsedWeeks);
 
-      const x = parsedWeeks.filter((workDay) => {
-        const workDayDate = Anwesenheiten.parse(workDay);
-        if (!workDayDate) return false;
-        return getWeekNumber(workDayDate.day) === input.woche;
-      });
-      console.log("x", mapToWorkWeek(x));
-      return mapToWorkWeek(x);
+      // Anwesenheiten nach Kalenderwoche filtern und in Wochen-Tag-Struktur umwandeln
+      const anwesenheitenInGewuenschterWoche = wochenMitAnwesenheiten.filter(
+        (anwesenheitProTag) => {
+          const tagMitAnwesenheit = Anwesenheiten.parse(anwesenheitProTag);
+          if (!tagMitAnwesenheit) return false;
+          return getWeekNumber(tagMitAnwesenheit.day) === input.woche;
+        }
+      );
+      return mapToWorkWeek(anwesenheitenInGewuenschterWoche);
     }),
-  createAttendance: protectedProcedure
-    .input(z.object({ day: z.date() }))
+  createAnwesenheit: protectedProcedure
+    .input(z.object({ tag: z.date() }))
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.session.user;
-      console.log("user", user);
-      const teamIdOfUser = await ctx.prisma.teamMember.findFirst({
+      const aktuellerBenutzer = ctx.session.user;
+      const teamIdDesBenutzers = await ctx.prisma.teamMember.findFirst({
         where: {
-          id: user.id,
+          id: aktuellerBenutzer.id,
         },
       });
-      console.log(teamIdOfUser?.teamId);
+
       await ctx.prisma.attendance.create({
         data: {
-          day: input.day,
-          team: { connect: { id: teamIdOfUser?.teamId } },
-          teamMember: { connect: { id: user.id } },
+          day: input.tag,
+          team: { connect: { id: teamIdDesBenutzers?.teamId } },
+          teamMember: { connect: { id: aktuellerBenutzer.id } },
         },
       });
     }),
-  removeAttendance: protectedProcedure
-    .input(z.object({ dateId: z.string() }))
+  anwesenheitLoeschen: protectedProcedure
+    .input(z.object({ anwesenheitId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.prisma.attendance.delete({
         where: {
-          id: input.dateId,
+          id: input.anwesenheitId,
         },
       });
     }),
