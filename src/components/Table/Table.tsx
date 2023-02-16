@@ -1,39 +1,50 @@
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { WocheMitAnwesenheiten } from "../../server/api/routers/attendance";
 import type { PresentTeamMember } from "../../server/api/routers/teamMember";
 import { api } from "../../utils/api";
 import { getWeekNumber } from "../../utils/getWeek";
 import SignIn from "../SignIn";
 import TeamsSettingsView from "../TeamSettings/TeamsSettingsView";
+import { atom, useAtom } from "jotai";
+
 type Wochentag = "Montag" | "Dienstag" | "Mittwoch" | "Donnerstag" | "Freitag";
 type ArbeitsWochenTag = {
   tag: Wochentag;
   anwesendeMember?: PresentTeamMember[];
 };
 
+const datumsbereichVonKalenderwocheAtom = atom("");
+const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(new Date()));
+const ausgewaehltesJahrAtom = atom<number>(new Date().getFullYear());
 export default function Table() {
   const session = useSession();
   const hasSession = session.status === "authenticated";
-
   const date = new Date();
-  const currentYear = date.getFullYear();
   const currentWeek = getWeekNumber(date);
-  const [aktuelleWoche, setAktuelleWoche] = useState<number>(currentWeek);
-  const [aktuellesJahr, setAktuelleJahr] = useState<number>(currentYear);
+
+  const [datumsbereichVonKalenderwoche, setDatumsbereichVonKalenderwoche] =
+    useAtom(datumsbereichVonKalenderwocheAtom);
+  const [ausgewaehlteWoche, setAusgewaehlteWoche] = useAtom(
+    ausgewaehlteWocheAtom
+  );
+  const [ausgewaehltesJahr, setAusgewaehltesJahr] = useAtom(
+    ausgewaehltesJahrAtom
+  );
+
   const {
     data: getWeek,
-    remove,
     status,
     refetch,
   } = api.anwesenheiten.getAnwesenheitenDesTeams.useQuery({
-    jahr: aktuellesJahr,
-    woche: aktuelleWoche,
+    jahr: ausgewaehltesJahr,
+    woche: ausgewaehlteWoche,
   });
 
+  const { data: isTeamMember } = api.teamMember.isTeamMember.useQuery();
   const anwesenheitenMutation = api.anwesenheiten.createAnwesenheit.useMutation(
     {
-      async onSuccess(data, variables, context) {
+      async onSuccess() {
         await refetch();
       },
     }
@@ -45,35 +56,37 @@ export default function Table() {
         await refetch();
       },
     });
-  const { data: isTeamMember } = api.teamMember.isTeamMember.useQuery();
-
-  useEffect(() => {
-    setAktuelleWoche(currentWeek);
-    setAktuelleJahr(currentYear);
-  }, [currentWeek, currentYear]);
 
   function handleZurueckWoche() {
-    if (aktuelleWoche > 0) {
-      setAktuelleWoche(aktuelleWoche - 1);
+    if (ausgewaehlteWoche > 0) {
+      setAusgewaehlteWoche(ausgewaehlteWoche - 1);
+      setDatumsbereichVonKalenderwoche(
+        getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+      );
     }
-    if (aktuelleWoche === 1) {
-      setAktuelleJahr(aktuellesJahr - 1);
-      setAktuelleWoche(52);
+    if (ausgewaehlteWoche === 1) {
+      setAusgewaehlteWoche(ausgewaehltesJahr - 1);
+      setAusgewaehlteWoche(52);
+      setDatumsbereichVonKalenderwoche(
+        getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+      );
     }
   }
 
   function handleVorWoche() {
-    if (aktuelleWoche < 52) {
-      setAktuelleWoche(aktuelleWoche + 1);
+    if (ausgewaehlteWoche < 52) {
+      setAusgewaehlteWoche(ausgewaehlteWoche + 1);
     }
-    if (aktuelleWoche === 52) {
-      setAktuelleJahr(aktuellesJahr + 1);
-      setAktuelleWoche(1);
+    if (ausgewaehlteWoche === 52) {
+      setAusgewaehlteWoche(ausgewaehltesJahr + 1);
+      setAusgewaehlteWoche(1);
     }
+    setDatumsbereichVonKalenderwoche(
+      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+    );
   }
 
   function handleAnwesenheit(date: Date) {
-    console.log("datess" + JSON.stringify(date));
     anwesenheitenMutation.mutate({
       tag: date,
     });
@@ -85,6 +98,14 @@ export default function Table() {
     });
   }
 
+  useEffect(() => {
+    setAusgewaehlteWoche(currentWeek);
+    setAusgewaehltesJahr(date.getFullYear());
+    setDatumsbereichVonKalenderwoche(
+      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+    );
+  }, []);
+
   switch (hasSession) {
     case true:
       return isTeamMember ? (
@@ -93,61 +114,52 @@ export default function Table() {
             <div className="flex w-full justify-between">
               <button onClick={handleZurueckWoche}>zurück</button>
               <p className="text-center">
-                Aktuelle Woche: {aktuelleWoche} {aktuellesJahr} {status}
+                Kalenderwoche: {ausgewaehlteWoche} {ausgewaehltesJahr}
               </p>
+
               <button onClick={handleVorWoche}>vor</button>
             </div>
-
-            {/* Hier soll die attendence Woche ausgegeben werden
-            Schreibe eine funktion die
-            */}
-
+            <p>{datumsbereichVonKalenderwoche}</p>
             <ul className="flex w-full flex-col justify-between md:-flex-row">
-              {getWeek &&
-                getWeek?.map((tag, i) => (
-                  <li key={i}>
-                    <div className="flex flex-col">
-                      <div className=" flex flex-row justify-between">
-                        <div
-                          onClick={() => handleAnwesenheit}
-                          className=" text-lg font-bold"
-                        >
-                          <button
-                            onClick={() =>
-                              handleAnwesenheit(
-                                getDateForWeekdayInWeek(
-                                  tag.tag,
-                                  currentWeek,
-                                  currentYear
-                                )
-                              )
-                            }
-                          >
-                            {tag.tag}
-                          </button>
-                        </div>
-
+              {getWeek?.map((tag, i) => (
+                <li key={i}>
+                  <div className="flex flex-col">
+                    <div className=" flex flex-row justify-between">
+                      <div
+                        onClick={() => handleAnwesenheit}
+                        className=" text-lg font-bold"
+                      >
                         <button
-                          className="rounded-b bg-amber-400 font-semibold text-white no-underline transition hover:bg-orange-500/20"
-                          onClick={() => console.log("anwesend")}
-                        ></button>
-                      </div>
-                      <div>
-                        {tag.anwesendeMember?.map((member, index) => (
-                          <span className="" key={index}>
-                            <p
-                              onClick={() =>
-                                handleAbmelden(member?.tagesId ?? "")
-                              }
-                            >
-                              {member?.name}
-                            </p>
-                          </span>
-                        ))}
+                          onClick={() => {
+                            handleAnwesenheit(
+                              getDateForWeekdayInWeek(
+                                tag.tag,
+                                ausgewaehlteWoche,
+                                ausgewaehltesJahr
+                              )
+                            );
+                          }}
+                        >
+                          {tag.tag}
+                        </button>
                       </div>
                     </div>
-                  </li>
-                ))}
+                    <div>
+                      {tag.anwesendeMember?.map((member, index) => (
+                        <span className="" key={index}>
+                          <p
+                            onClick={() =>
+                              handleAbmelden(member?.tagesId ?? "")
+                            }
+                          >
+                            {member?.name}
+                          </p>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         </>
@@ -213,6 +225,27 @@ export function mapToWorkWeek(week: WocheMitAnwesenheiten): ArbeitsWochenTag[] {
   });
 
   return workWeek;
+}
+export function getDatumsbereichVonKalenderwoche(
+  kalenderwoche: number,
+  jahr: number
+): string {
+  const tagDerWoche = 1; // 1 = Montag
+  const datum = new Date(jahr, 0, (tagDerWoche - 1) * 7 + 1);
+  const tagDesJahres = datum.getDay();
+  const tageBisZumMontag = tagDerWoche - tagDesJahres;
+  const tagImMonat =
+    datum.getDate() + tageBisZumMontag + (kalenderwoche - 1) * 7;
+
+  const startDatum = new Date(jahr, 0, tagImMonat);
+  const endDatum = new Date(jahr, 0, tagImMonat + 5);
+
+  const startTag = startDatum.getDate().toString().padStart(2, "0");
+  const startMonat = (startDatum.getMonth() + 1).toString().padStart(2, "0");
+  const endTag = endDatum.getDate().toString().padStart(2, "0");
+  const endMonat = (endDatum.getMonth() + 1).toString().padStart(2, "0");
+
+  return `${startTag}.${startMonat} bis ${endTag}.${endMonat}`;
 }
 
 export function getDateForWeekdayInWeek(
