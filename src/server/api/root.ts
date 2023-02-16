@@ -1,5 +1,6 @@
-import { exampleRouter } from "./routers/example";
-import { fireStoreRouter } from "./routers/firestore";
+import { anwesenheitenRouter } from "./routers/attendance";
+import { teamsRouter } from "./routers/team";
+import { teamMemberRouter } from "./routers/teamMember";
 import { createTRPCRouter } from "./trpc";
 
 /**
@@ -7,9 +8,11 @@ import { createTRPCRouter } from "./trpc";
  *
  * All routers added in /api/routers should be manually added here
  */
+
 export const appRouter = createTRPCRouter({
-  firestore: fireStoreRouter,
-  example: exampleRouter,
+  teamMember: teamMemberRouter,
+  anwesenheiten: anwesenheitenRouter,
+  teams: teamsRouter,
 });
 
 // export type definition of API
