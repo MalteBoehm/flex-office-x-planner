@@ -174,7 +174,9 @@ export default function Table() {
   }
 }
 
-export function mapToWorkWeek(week: WocheMitAnwesenheiten): ArbeitsWochenTag[] {
+export function mapWochenMitAnwesenheitenToWorkWeek(
+  week: WocheMitAnwesenheiten
+): ArbeitsWochenTag[] {
   const workWeek: ArbeitsWochenTag[] = [
     { tag: "Montag" },
     { tag: "Dienstag" },
@@ -212,6 +214,7 @@ export function mapToWorkWeek(week: WocheMitAnwesenheiten): ArbeitsWochenTag[] {
         day?.teamMembers?.map((member) => {
           return {
             ...member,
+
             tagesId: day.id,
             day: day.day,
           };

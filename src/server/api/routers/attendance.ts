@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { mapToWorkWeek } from "../../../components/Table/Table";
-import { getWeekNumber } from "../../../utils/getWeek";
+import { addDays, addWeeks, isSameDay, startOfWeek } from "date-fns";
+
+import { mapWochenMitAnwesenheitenToWorkWeek } from "../../../components/Table/Table";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const TeamMember = z.object({
@@ -19,9 +20,6 @@ const Anwesenheiten = z
   })
   .optional();
 const WocheMitAnwesenheiten = z.array(Anwesenheiten);
-// await ctx.prisma.attendance.deleteMany({});
-// await ctx.prisma.team.deleteMany({});
-// await ctx.prisma.teamMember.deleteMany({});
 
 export const anwesenheitenRouter = createTRPCRouter({
   getAnwesenheitenDesTeams: protectedProcedure
@@ -52,42 +50,59 @@ export const anwesenheitenRouter = createTRPCRouter({
       const teammitgliederIds = alleMitgliederDesTeams.map(
         (mitglied) => mitglied.id
       );
-      // alle Anwesenheiten nach den IDs der Teammitglieder abrufen und nach Kalenderwoche filtern
-      const anwesenheiten = await ctx.prisma.attendance.findMany({
+
+      // Anwesenheiten im gewünschten Zeitraum abrufen
+
+      // Das Datum des Montags der gewünschten Woche berechnen
+      const mondayOfWeek = startOfWeek(new Date(input.jahr, 0, 1), {
+        weekStartsOn: 1,
+      }); // Montag der ersten Kalenderwoche des Jahres
+      const desiredMonday = addWeeks(mondayOfWeek, input.woche); // Montag der gewünschten Kalenderwoche
+      const endeDerWoche = addDays(desiredMonday, 4);
+
+      const anwesenheitenEinerWoche = await ctx.prisma.attendance.findMany({
         where: {
-          teamMemberId: { in: teammitgliederIds },
+          day: {
+            gte: desiredMonday,
+            lte: endeDerWoche,
+          },
+          teamMemberId: {
+            in: teammitgliederIds,
+          },
+        },
+        include: {
+          teamMember: true,
         },
       });
 
-      // Anwesenheiten in Wochen- und Tag-Struktur umwandeln
-      const anwesenheitenProTag = anwesenheiten.map((anwesenheit) => {
-        if (anwesenheit) {
+      const anwesenheitenMapFromAnwesenheitenEinerWoche =
+        anwesenheitenEinerWoche.map((anwesenheit) => {
           const anwesenheitProTag: Anwesenheiten = {
-            day: anwesenheit?.day,
-            id: anwesenheit?.id,
-            teamId: anwesenheit?.teamId ?? "",
-            teamMembers: TeamMembers.parse(alleMitgliederDesTeams),
+            day: anwesenheit.day,
+            id: anwesenheit.id,
+            teamMembers: [],
+            teamId: aktuellesMitglied.teamId,
           };
+
+          anwesenheitenEinerWoche.forEach((x) => {
+            if (x !== anwesenheit && isSameDay(x.day, anwesenheit.day)) {
+              anwesenheitProTag?.teamMembers?.push(
+                TeamMember.parse(x.teamMember)
+              );
+            }
+          });
+
           return anwesenheitProTag;
-        }
-      });
+        });
+
       const wochenMitAnwesenheiten = WocheMitAnwesenheiten.parse(
-        anwesenheitenProTag.map((anwesenheitProTag) => {
+        anwesenheitenMapFromAnwesenheitenEinerWoche.map((anwesenheitProTag) => {
           if (anwesenheitProTag) {
             return anwesenheitProTag;
           }
         })
       );
-
-      // Anwesenheiten nach Kalenderwoche filtern und in Wochen-Tag-Struktur umwandeln
-      const anwesenheitenInGewuenschterWoche = wochenMitAnwesenheiten.filter(
-        (anwesenheitProTag) => {
-          const tagMitAnwesenheit = Anwesenheiten.parse(anwesenheitProTag);
-          if (!tagMitAnwesenheit) return false;
-          return getWeekNumber(tagMitAnwesenheit.day) === input.woche;
-        }
-      );
-      return mapToWorkWeek(anwesenheitenInGewuenschterWoche);
+      return mapWochenMitAnwesenheitenToWorkWeek(wochenMitAnwesenheiten);
     }),
   createAnwesenheit: protectedProcedure
     .input(z.object({ tag: z.date() }))
@@ -102,7 +117,6 @@ export const anwesenheitenRouter = createTRPCRouter({
       await ctx.prisma.attendance.create({
         data: {
           day: input.tag,
-          team: { connect: { id: teamIdDesBenutzers?.teamId } },
           teamMember: { connect: { id: aktuellerBenutzer.id } },
         },
       });

@@ -9,10 +9,9 @@ datasource db {
 }
 
 model Team {
-  id          String       @id @default(cuid())
-  name        String
-  members     TeamMember[]
-  attendances Attendance[]
+  id      String       @id @default(cuid())
+  name    String
+  members TeamMember[]
 }
 
 model TeamMember {
@@ -30,13 +29,10 @@ model TeamMember {
 model Attendance {
   id           String     @id @default(cuid())
   day          DateTime
-  teamId       String?
-  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id])
-  team         Team?      @relation(fields: [teamId], references: [id])
   teamMemberId String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id])
 
   @@index([teamMemberId])
-  @@index([teamId])
 }
 
 model AttendanceToTeamMember {

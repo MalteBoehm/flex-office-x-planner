@@ -35,9 +35,7 @@ export const teamsRouter = createTRPCRouter({
           },
         });
       }
-      console.log("team already exists", teamAlreadyExists);
       if (!teamAlreadyExists) {
-        console.log("team already exists");
         return await ctx.prisma.team.create({
           data: {
             name: input.name,
@@ -52,14 +50,28 @@ export const teamsRouter = createTRPCRouter({
   switchTeam: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      // remover userId from current Team
-      // add userId to new Team
-      const member = await ctx.prisma.teamMember.update({
+      const findMember = await ctx.prisma.teamMember.findFirst({
         where: { id: ctx.session.user.id },
-        select: { teamId: true },
-        data: { teamId: input },
       });
-      console.log("member", member);
+
+      if (!findMember) {
+        console.log("user not in team" + input);
+        await ctx.prisma.teamMember.create({
+          data: {
+            id: ctx.session.user.id,
+            team: { connect: { id: input } },
+            name: ctx.session.user.name ?? "Unbekannt",
+            image: ctx.session.user.image ?? "",
+            email: ctx.session.user.email ?? "",
+          },
+        });
+      } else {
+        await ctx.prisma.teamMember.update({
+          where: { id: ctx.session.user.id },
+          select: { teamId: true },
+          data: { teamId: input },
+        });
+      }
     }),
   deleteTeam: protectedProcedure
     .input(z.string())

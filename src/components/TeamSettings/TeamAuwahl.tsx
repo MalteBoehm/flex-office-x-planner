@@ -1,5 +1,5 @@
 import type { Team } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function TeamAuwahl({
   data,
@@ -16,6 +16,9 @@ export default function TeamAuwahl({
 }) {
   const [selectedTeam, setSelectedTeam] = useState<string>("");
 
+  useEffect(() => {
+    setSelectedTeam(data?.[0]?.id || "");
+  }, [data]);
   return (
     <div>
       <h2 className="text-lg font-bold">Team wechseln</h2>
@@ -33,7 +36,9 @@ export default function TeamAuwahl({
             ))}
         </select>
         <button
-          onClick={() => switchTeamMutation.mutate(selectedTeam)}
+          onClick={() => {
+            switchTeamMutation.mutate(selectedTeam);
+          }}
           className="px-1 text-sm font-semibold  text-orange-500 no-underline transition hover:bg-white/20"
         >
           Team beitreten
