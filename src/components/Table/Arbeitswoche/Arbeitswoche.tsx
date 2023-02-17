@@ -11,8 +11,8 @@ export default function Arbeitswoche(props: Props) {
   return (
     <ul className="flex w-full flex-col justify-between md:-flex-row">
       {props.getWeek?.map((tag, i) => (
-        <li key={i}>
-          <div className="flex flex-col">
+        <li className=" min-h-[100px] border-2 p-5 drop-shadow-lg" key={i}>
+          <div className="flex flex-col ">
             <div className=" flex flex-row justify-between">
               <div>
                 <p className="text-lg font-bold"> {tag.tag}</p>

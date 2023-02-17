@@ -87,12 +87,16 @@ export default function Table() {
         <>
           <div className="flex h-full min-h-min w-full flex-col gap-9 bg-white p-4">
             <div className="flex w-full justify-between">
-              <button onClick={handleZurueckWoche}>zurück</button>
+              <button className="text-3xl" onClick={handleZurueckWoche}>
+                ⬅️
+              </button>
               <p className="text-center">
                 Kalenderwoche: {ausgewaehlteWoche} {ausgewaehltesJahr}
               </p>
 
-              <button onClick={handleVorWoche}>vor</button>
+              <button className="text-3xl" onClick={handleVorWoche}>
+                ➡️
+              </button>
             </div>
             <p>{datumsbereichVonKalenderwoche}</p>
             <Suspense fallback={<p>Lade</p>}>

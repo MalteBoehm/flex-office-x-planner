@@ -26,9 +26,12 @@ const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
   if (!sessionData) return <SignIn />;
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-4 bg-amber-400">
-      <p className="text-center text-2xl text-white">
-        {sessionData && sessionData.user.image && (
+    <div className="flex w-full flex-col items-center justify-center gap-4 bg-amber-400 text-center">
+      <p className="justify-center self-center text-center text-2xl text-white">
+        Hallo {sessionData.user.name}
+      </p>
+      {sessionData && sessionData.user.image && (
+        <span>
           <Image
             alt={sessionData.user.name ?? ""}
             src={sessionData.user.image}
@@ -36,9 +39,8 @@ const AuthShowcase: React.FC = () => {
             height={200}
             className="mr-2 h-10 w-10 rounded-full"
           />
-        )}
-        Hallo {sessionData.user.name}
-      </p>
+        </span>
+      )}
       {sessionData && <Table />}
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
