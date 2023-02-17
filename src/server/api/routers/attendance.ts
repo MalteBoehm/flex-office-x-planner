@@ -54,7 +54,7 @@ export const anwesenheitenRouter = createTRPCRouter({
       // Anwesenheiten im gewünschten Zeitraum abrufen
 
       // Das Datum des Montags der gewünschten Woche berechnen
-      const mondayOfWeek = startOfWeek(new Date(input.jahr, 0, 1), {
+      const mondayOfWeek = startOfWeek(new Date(Date.UTC(input.jahr, 0, 1)), {
         weekStartsOn: 1,
       }); // Montag der ersten Kalenderwoche des Jahres
       const desiredMonday = addWeeks(mondayOfWeek, input.woche); // Montag der gewünschten Kalenderwoche
@@ -101,7 +101,6 @@ export const anwesenheitenRouter = createTRPCRouter({
           }
         })
       );
-      console.log(wochenMitAnwesenheiten);
 
       return mapWochenMitAnwesenheitenToWorkWeek(wochenMitAnwesenheiten);
     }),
