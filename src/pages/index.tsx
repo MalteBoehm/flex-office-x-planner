@@ -37,6 +37,7 @@ const AuthShowcase: React.FC = () => {
             className="mr-2 h-10 w-10 rounded-full"
           />
         )}
+        Hallo {sessionData.user.name}
       </p>
       {sessionData && <Table />}
       <button

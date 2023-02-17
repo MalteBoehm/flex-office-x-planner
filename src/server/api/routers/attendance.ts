@@ -74,13 +74,12 @@ export const anwesenheitenRouter = createTRPCRouter({
           teamMember: true,
         },
       });
-
       const anwesenheitenMapFromAnwesenheitenEinerWoche =
         anwesenheitenEinerWoche.map((anwesenheit) => {
           const anwesenheitProTag: Anwesenheiten = {
             day: anwesenheit.day,
             id: anwesenheit.id,
-            teamMembers: [],
+            teamMembers: [TeamMember.parse(anwesenheit.teamMember)],
             teamId: aktuellesMitglied.teamId,
           };
 
@@ -102,33 +101,45 @@ export const anwesenheitenRouter = createTRPCRouter({
           }
         })
       );
+      console.log(wochenMitAnwesenheiten);
+
       return mapWochenMitAnwesenheitenToWorkWeek(wochenMitAnwesenheiten);
     }),
   createAnwesenheit: protectedProcedure
     .input(z.object({ tag: z.date() }))
     .mutation(async ({ input, ctx }) => {
       const aktuellerBenutzer = ctx.session.user;
-      const teamIdDesBenutzers = await ctx.prisma.teamMember.findFirst({
+      // check if attendance already exists for this day
+      const anwesenheitExistiert = await ctx.prisma.attendance.findFirst({
         where: {
-          id: aktuellerBenutzer.id,
-        },
-      });
-
-      await ctx.prisma.attendance.create({
-        data: {
           day: input.tag,
-          teamMember: { connect: { id: aktuellerBenutzer.id } },
+          teamMemberId: aktuellerBenutzer.id,
         },
       });
+      if (!anwesenheitExistiert) {
+        await ctx.prisma.attendance.create({
+          data: {
+            day: input.tag,
+            teamMemberId: aktuellerBenutzer.id,
+          },
+        });
+      }
     }),
   anwesenheitLoeschen: protectedProcedure
     .input(z.object({ anwesenheitId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await ctx.prisma.attendance.delete({
+      const isUserAttendence = await ctx.prisma.attendance.findFirst({
         where: {
           id: input.anwesenheitId,
         },
       });
+      if (isUserAttendence?.teamMemberId === ctx.session.user.id) {
+        await ctx.prisma.attendance.delete({
+          where: {
+            id: input.anwesenheitId,
+          },
+        });
+      }
     }),
 });
 

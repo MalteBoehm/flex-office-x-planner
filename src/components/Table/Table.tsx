@@ -7,6 +7,7 @@ import { getWeekNumber } from "../../utils/getWeek";
 import SignIn from "../SignIn";
 import TeamsSettingsView from "../TeamSettings/TeamsSettingsView";
 import { atom, useAtom } from "jotai";
+import Image from "next/image";
 
 type Wochentag = "Montag" | "Dienstag" | "Mittwoch" | "Donnerstag" | "Freitag";
 type ArbeitsWochenTag = {
@@ -154,6 +155,15 @@ export default function Table() {
                           >
                             {member?.name}
                           </p>
+                          {member?.image && (
+                            <Image
+                              alt={member?.name ?? ""}
+                              src={member?.image}
+                              width={200}
+                              height={200}
+                              className="mr-2 h-10 w-10 rounded-full"
+                            />
+                          )}
                         </span>
                       ))}
                     </div>
