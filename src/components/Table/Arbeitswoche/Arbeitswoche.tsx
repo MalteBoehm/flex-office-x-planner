@@ -31,6 +31,7 @@ export default function Arbeitswoche(props: Props) {
                     {index > 0 && ","}
                     {index > 0 && " "}
                     {member?.name}
+                    {member?.day.getDay()}
                   </p>
                   {/*{member?.image && (*/}
                   {/*  <Image*/}
