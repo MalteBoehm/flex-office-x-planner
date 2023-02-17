@@ -132,7 +132,7 @@ export function mapWochenMitAnwesenheitenToWorkWeek(
   ];
 
   week.forEach((day) => {
-    const dayOfWeek = day?.day.getDay();
+    const dayOfWeek = day?.day.getUTCDay();
     let tag: Wochentag | undefined;
 
     switch (dayOfWeek) {
@@ -160,9 +160,8 @@ export function mapWochenMitAnwesenheitenToWorkWeek(
         day?.teamMembers?.map((member) => {
           return {
             ...member,
-
             tagesId: day.id,
-            day: day.day,
+            day: new Date(day.day),
           };
         }) ?? [];
 
