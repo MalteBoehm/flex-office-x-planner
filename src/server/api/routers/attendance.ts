@@ -106,7 +106,7 @@ export const anwesenheitenRouter = createTRPCRouter({
       return mapWochenMitAnwesenheitenToWorkWeek(wochenMitAnwesenheiten);
     }),
   createAnwesenheit: protectedProcedure
-    .input(z.object({ tag: z.date() }))
+    .input(z.object({ tag: z.string().datetime() }))
     .mutation(async ({ input, ctx }) => {
       const aktuellerBenutzer = ctx.session.user;
       // check if attendance already exists for this day
@@ -116,6 +116,8 @@ export const anwesenheitenRouter = createTRPCRouter({
           teamMemberId: aktuellerBenutzer.id,
         },
       });
+
+      console.log(input.tag);
       if (!anwesenheitExistiert) {
         await ctx.prisma.attendance.create({
           data: {

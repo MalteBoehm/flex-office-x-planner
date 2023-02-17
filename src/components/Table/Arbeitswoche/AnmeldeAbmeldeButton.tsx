@@ -40,7 +40,7 @@ export default function AnmeldeAbmeldeButton(props: Props) {
 
   function handleAnwesenheit(date: Date) {
     anwesenheitenMutation.mutate({
-      tag: date,
+      tag: date.toISOString(),
     });
   }
 
