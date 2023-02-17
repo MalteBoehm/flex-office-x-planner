@@ -1,7 +1,7 @@
 import { ArbeitsWochenTag, getDateForWeekdayInWeek } from "../Table";
 import { api } from "../../../utils/api";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   tag: ArbeitsWochenTag;
@@ -12,7 +12,7 @@ type Props = {
 
 export default function AnmeldeAbmeldeButton(props: Props) {
   const [isAngemeldet, setIsAngemeldet] = useState(true);
-  const session = useSession();
+  const { data: session } = useSession();
   const anwesenheitenMutation = api.anwesenheiten.createAnwesenheit.useMutation(
     {
       async onSuccess() {
@@ -20,15 +20,22 @@ export default function AnmeldeAbmeldeButton(props: Props) {
       },
     }
   );
-
   const removeAnwesenheitMutation =
     api.anwesenheiten.anwesenheitLoeschen.useMutation({
       async onSuccess() {
         await props.refetch();
       },
     });
+
+  const buttonStyles = {
+    anwesenheitHinzufuegen:
+      "rounded py-2 px-4 font-bold text-white hover:bg-green-700 bg-green-500",
+    anwesenheitEntfernen:
+      "rounded py-2 px-4 font-bold text-white hover:bg-red-700 bg-red-500",
+  };
+
   const [buttonStyle, setButtonStyle] = useState(
-    "rounded py-2 px-4 font-bold text-white hover:bg-green-700 bg-green-500"
+    buttonStyles.anwesenheitHinzufuegen
   );
 
   function handleAnwesenheit(date: Date) {
@@ -44,40 +51,47 @@ export default function AnmeldeAbmeldeButton(props: Props) {
     });
   }
 
-  return (
-    <button
-      className={buttonStyle}
-      onClick={() => {
-        const isAbwesend = !props.tag.anwesendeMember?.find(
-          (m) => m?.id === session.data?.user.id
-        );
+  useEffect(() => {
+    const isEingetragen = props.tag.anwesendeMember?.find(
+      (m) => m?.id === session?.user?.id
+    );
+    if (isEingetragen) {
+      setIsAngemeldet(true);
+      return setButtonStyle(buttonStyles.anwesenheitEntfernen);
+    }
+    if (!isEingetragen) {
+      setIsAngemeldet(false);
+      return setButtonStyle(buttonStyles.anwesenheitHinzufuegen);
+    }
+  }, [session?.user?.id, props.tag.anwesendeMember]);
 
-        if (isAbwesend) {
-          setButtonStyle(
-            "rounded py-2 px-4 font-bold text-white hover:bg-red-700 bg-red-500"
-          );
-          setIsAngemeldet(false);
-          handleAnwesenheit(
-            getDateForWeekdayInWeek(
-              props.tag.tag,
-              props.ausgewaehlteWoche,
-              props.ausgewaehltesJahr
-            )
-          );
-        } else {
-          setButtonStyle(
-            "rounded py-2 px-4 font-bold text-white hover:bg-green-700 bg-green-500"
-          );
-          setIsAngemeldet(true);
-          handleAbmelden(
-            props.tag.anwesendeMember?.find(
-              (e) => e?.id === session.data?.user.id
-            )?.tagesId ?? ""
-          );
-        }
-      }}
-    >
-      {isAngemeldet ? "+" : "-"}
+  const handleClick = () => {
+    const isAbwesend = !props.tag.anwesendeMember?.find(
+      (m) => m?.id === session?.user?.id
+    );
+
+    if (isAbwesend) {
+      handleAnwesenheit(
+        getDateForWeekdayInWeek(
+          props.tag.tag,
+          props.ausgewaehlteWoche,
+          props.ausgewaehltesJahr
+        )
+      );
+    } else {
+      const anwesender = props.tag.anwesendeMember?.find(
+        (e) => e?.id === session?.user?.id
+      );
+      if (!anwesender) {
+        return;
+      }
+      handleAbmelden(anwesender.tagesId ?? "");
+    }
+  };
+
+  return (
+    <button className={buttonStyle} onClick={handleClick}>
+      {!isAngemeldet ? "+" : "-"}
     </button>
   );
 }

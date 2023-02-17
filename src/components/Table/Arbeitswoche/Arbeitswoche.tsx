@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ArbeitsWochenTag } from "../Table";
 import AnmeldeAbmeldeButton from "./AnmeldeAbmeldeButton";
 
@@ -25,19 +24,23 @@ export default function Arbeitswoche(props: Props) {
                 ausgewaehltesJahr={props.ausgewaehltesJahr}
               />
             </div>
-            <div>
+            <div className="flex flex-row">
               {tag.anwesendeMember?.map((member, index) => (
                 <span className="" key={index}>
-                  <p>{member?.name}</p>
-                  {member?.image && (
-                    <Image
-                      alt={member?.name ?? ""}
-                      src={member?.image}
-                      width={200}
-                      height={200}
-                      className="mr-2 h-10 w-10 rounded-full"
-                    />
-                  )}
+                  <p>
+                    {index > 0 && ","}
+                    {index > 0 && " "}
+                    {member?.name}
+                  </p>
+                  {/*{member?.image && (*/}
+                  {/*  <Image*/}
+                  {/*    alt={member?.name ?? ""}*/}
+                  {/*    src={member?.image}*/}
+                  {/*    width={200}*/}
+                  {/*    height={200}*/}
+                  {/*    className="mr-2 h-10 w-10 rounded-full"*/}
+                  {/*  />*/}
+                  {/*)}*/}
                 </span>
               ))}
             </div>
