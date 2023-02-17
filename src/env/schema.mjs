@@ -8,6 +8,8 @@ export const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   GOOGLE_ID: z.string(),
   GOOGLE_SECRET: z.string(),
+  GITHUB_ID: z.string(),
+  GITHUB_SECRET: z.string(),
 });
 
 /**
@@ -19,6 +21,8 @@ export const serverEnv = {
   NODE_ENV: process.env.NODE_ENV,
   GOOGLE_ID: process.env.GOOGLE_ID,
   GOOGLE_SECRET: process.env.GOOGLE_SECRET,
+  GITHUB_ID: process.env.GITHUB_ID,
+  GITHUB_SECRET: process.env.GITHUB_SECRET,
 };
 
 /**

@@ -1,13 +1,10 @@
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import type { GetServerSidePropsContext } from "next";
-import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
-} from "next-auth";
+import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { env } from "../env.mjs";
 import { firebaseConfig } from "../firebase";
+import GitHubProvider from "next-auth/providers/github";
 
 /**
  * Module augmentation for `next-auth` types.
@@ -54,6 +51,10 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_ID,
       clientSecret: env.GOOGLE_SECRET,
+    }),
+    GitHubProvider({
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET,
     }),
     /**
      * ...add more providers here
