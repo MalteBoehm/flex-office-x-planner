@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import type { WocheMitAnwesenheiten } from "../../server/api/routers/attendance";
 import type { PresentTeamMember } from "../../server/api/routers/teamMember";
 import { api } from "../../utils/api";
@@ -7,10 +7,10 @@ import { getWeekNumber } from "../../utils/getWeek";
 import SignIn from "../SignIn";
 import TeamsSettingsView from "../TeamSettings/TeamsSettingsView";
 import { atom, useAtom } from "jotai";
-import Image from "next/image";
+import Arbeitswoche from "./Arbeitswoche/Arbeitswoche";
 
 type Wochentag = "Montag" | "Dienstag" | "Mittwoch" | "Donnerstag" | "Freitag";
-type ArbeitsWochenTag = {
+export type ArbeitsWochenTag = {
   tag: Wochentag;
   anwesendeMember?: PresentTeamMember[];
 };
@@ -18,6 +18,7 @@ type ArbeitsWochenTag = {
 const datumsbereichVonKalenderwocheAtom = atom("");
 const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(new Date()));
 const ausgewaehltesJahrAtom = atom<number>(new Date().getFullYear());
+
 export default function Table() {
   const session = useSession();
   const hasSession = session.status === "authenticated";
@@ -41,22 +42,7 @@ export default function Table() {
     jahr: ausgewaehltesJahr,
     woche: ausgewaehlteWoche,
   });
-
   const { data: isTeamMember } = api.teamMember.isTeamMember.useQuery();
-  const anwesenheitenMutation = api.anwesenheiten.createAnwesenheit.useMutation(
-    {
-      async onSuccess() {
-        await refetch();
-      },
-    }
-  );
-
-  const removeAnwesenheitMutation =
-    api.anwesenheiten.anwesenheitLoeschen.useMutation({
-      async onSuccess() {
-        await refetch();
-      },
-    });
 
   function handleZurueckWoche() {
     if (ausgewaehlteWoche > 0) {
@@ -87,18 +73,6 @@ export default function Table() {
     );
   }
 
-  function handleAnwesenheit(date: Date) {
-    anwesenheitenMutation.mutate({
-      tag: date,
-    });
-  }
-  function handleAbmelden(id: string) {
-    if (id.length === 0) return;
-    removeAnwesenheitMutation.mutate({
-      anwesenheitId: id,
-    });
-  }
-
   useEffect(() => {
     setAusgewaehlteWoche(currentWeek);
     setAusgewaehltesJahr(date.getFullYear());
@@ -121,56 +95,14 @@ export default function Table() {
               <button onClick={handleVorWoche}>vor</button>
             </div>
             <p>{datumsbereichVonKalenderwoche}</p>
-            <ul className="flex w-full flex-col justify-between md:-flex-row">
-              {getWeek?.map((tag, i) => (
-                <li key={i}>
-                  <div className="flex flex-col">
-                    <div className=" flex flex-row justify-between">
-                      <div
-                        onClick={() => handleAnwesenheit}
-                        className=" text-lg font-bold"
-                      >
-                        <button
-                          onClick={() => {
-                            handleAnwesenheit(
-                              getDateForWeekdayInWeek(
-                                tag.tag,
-                                ausgewaehlteWoche,
-                                ausgewaehltesJahr
-                              )
-                            );
-                          }}
-                        >
-                          {tag.tag}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      {tag.anwesendeMember?.map((member, index) => (
-                        <span className="" key={index}>
-                          <p
-                            onClick={() =>
-                              handleAbmelden(member?.tagesId ?? "")
-                            }
-                          >
-                            {member?.name}
-                          </p>
-                          {member?.image && (
-                            <Image
-                              alt={member?.name ?? ""}
-                              src={member?.image}
-                              width={200}
-                              height={200}
-                              className="mr-2 h-10 w-10 rounded-full"
-                            />
-                          )}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <Suspense fallback={<p>Lade</p>}>
+              <Arbeitswoche
+                ausgewaehlteWoche={ausgewaehlteWoche}
+                ausgewaehltesJahr={ausgewaehltesJahr}
+                refetch={refetch}
+                getWeek={getWeek}
+              />
+            </Suspense>
           </div>
         </>
       ) : (
