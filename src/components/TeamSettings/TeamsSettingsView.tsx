@@ -5,15 +5,20 @@ import { api } from "../../utils/api";
 import Profil from "./Profil";
 import TeamAuwahl from "./TeamAuwahl";
 import TeamErstellen from "./TeamErstellen";
+import { ausgewaehltesJahrAtom, ausgewaehlteWocheAtom } from "../Table/Table";
+import { useAtom } from "jotai";
 
 export default function TeamsSettingsView() {
   const { data: session } = useSession();
   const [textfield, setTextfield] = useState<string>("");
-  const { data: teamName, remove: removeOldName } =
-    api.teamMember.getUsersTeamName.useQuery();
+  const {
+    data: teamName,
+    refetch: retchTeamName,
+    remove: removeOldName,
+  } = api.teamMember.getUsersTeamName.useQuery();
 
   const mutateTeam = api.teams.createTeam.useMutation({
-    onSuccess: () => api.teams.getTeam.useQuery(),
+    onSuccess: () => api.teams.getTeam.useQuery().refetch(),
   });
 
   const { data, status, refetch } = api.teams.getTeam.useQuery();
@@ -22,9 +27,18 @@ export default function TeamsSettingsView() {
       await refetch();
     },
   });
+  const [ausgewaehlteWoche] = useAtom(ausgewaehlteWocheAtom);
+  const [ausgewaehltesJahr] = useAtom(ausgewaehltesJahrAtom);
+  const { refetch: refetchAnwesenheiten } =
+    api.anwesenheiten.getAnwesenheitenDesTeams.useQuery({
+      woche: ausgewaehlteWoche,
+      jahr: ausgewaehltesJahr,
+    });
   const switchTeamMutation = api.teams.switchTeam.useMutation({
     onSuccess: async () => {
       await refetch();
+      await refetchAnwesenheiten();
+      await retchTeamName();
     },
   });
 

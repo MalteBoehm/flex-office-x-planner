@@ -16,8 +16,8 @@ export type ArbeitsWochenTag = {
 };
 
 const datumsbereichVonKalenderwocheAtom = atom("");
-const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(new Date()));
-const ausgewaehltesJahrAtom = atom<number>(new Date().getFullYear());
+export const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(new Date()));
+export const ausgewaehltesJahrAtom = atom<number>(new Date().getFullYear());
 
 export default function Table() {
   const session = useSession();

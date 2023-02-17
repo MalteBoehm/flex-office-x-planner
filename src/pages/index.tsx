@@ -5,6 +5,8 @@ import Head from "next/head";
 import Image from "next/image";
 import SignIn from "../components/SignIn";
 import Table from "../components/Table/Table";
+import TeamsSettingsView from "../components/TeamSettings/TeamsSettingsView";
+import { useState } from "react";
 
 const Home: NextPage = () => {
   return (
@@ -24,6 +26,7 @@ export default Home;
 
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
+  const [settingsOffen, setSettingsOffen] = useState(false);
   if (!sessionData) return <SignIn />;
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4 bg-amber-400 text-center">
@@ -41,6 +44,15 @@ const AuthShowcase: React.FC = () => {
           />
         </span>
       )}
+      {sessionData && (
+        <p
+          onClick={() => setSettingsOffen(!settingsOffen)}
+          className="text-lg underline"
+        >
+          ⚙️Settings{" "}
+        </p>
+      )}
+      {settingsOffen && <TeamsSettingsView />}
       {sessionData && <Table />}
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
