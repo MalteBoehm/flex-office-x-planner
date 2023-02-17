@@ -30,7 +30,6 @@ export const anwesenheitenRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      // aktuelles Teammitglied abrufen
       const aktuellesMitglied = TeamMember.parse(
         await ctx.prisma.teamMember.findFirst({
           where: {
@@ -38,7 +37,7 @@ export const anwesenheitenRouter = createTRPCRouter({
           },
         })
       );
-      // alle Teammitglieder des Teams abrufen
+
       const alleMitgliederDesTeams: TeamMembers = TeamMembers.parse(
         await ctx.prisma.teamMember.findMany({
           where: {
@@ -46,14 +45,11 @@ export const anwesenheitenRouter = createTRPCRouter({
           },
         })
       );
-      // IDs der Teammitglieder benötigt, um Anwesenheiten abzurufen
+
       const teammitgliederIds = alleMitgliederDesTeams.map(
         (mitglied) => mitglied.id
       );
 
-      // Anwesenheiten im gewünschten Zeitraum abrufen
-
-      // Das Datum des Montags der gewünschten Woche berechnen
       const mondayOfWeek = startOfWeek(new Date(Date.UTC(input.jahr, 0, 1)), {
         weekStartsOn: 1,
       }); // Montag der ersten Kalenderwoche des Jahres
@@ -74,10 +70,12 @@ export const anwesenheitenRouter = createTRPCRouter({
           teamMember: true,
         },
       });
+
       const anwesenheitenMapFromAnwesenheitenEinerWoche =
         anwesenheitenEinerWoche.map((anwesenheit) => {
           const anwesenheitProTag: Anwesenheiten = {
-            day: anwesenheit.day,
+            // Convert date to UTC string
+            day: new Date(anwesenheit.day.toISOString()),
             id: anwesenheit.id,
             teamMembers: [TeamMember.parse(anwesenheit.teamMember)],
             teamId: aktuellesMitglied.teamId,
@@ -94,15 +92,9 @@ export const anwesenheitenRouter = createTRPCRouter({
           return anwesenheitProTag;
         });
 
-      const wochenMitAnwesenheiten = WocheMitAnwesenheiten.parse(
-        anwesenheitenMapFromAnwesenheitenEinerWoche.map((anwesenheitProTag) => {
-          if (anwesenheitProTag) {
-            return anwesenheitProTag;
-          }
-        })
+      return mapWochenMitAnwesenheitenToWorkWeek(
+        anwesenheitenMapFromAnwesenheitenEinerWoche
       );
-
-      return mapWochenMitAnwesenheitenToWorkWeek(wochenMitAnwesenheiten);
     }),
   createAnwesenheit: protectedProcedure
     .input(z.object({ tag: z.string().datetime() }))
