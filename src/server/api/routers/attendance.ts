@@ -78,8 +78,6 @@ export const anwesenheitenRouter = createTRPCRouter({
         endeDerWoche,
         "yyyy-MM-dd HH:mm:ss"
       );
-      // console.log(adjustedMonday.toISOString());
-      // console.log(endeDerWoche.toISOString());
       const anwesenheitenEinerWoche = await ctx.prisma.attendance.findMany({
         where: {
           day: {
@@ -94,7 +92,6 @@ export const anwesenheitenRouter = createTRPCRouter({
           teamMember: true,
         },
       });
-      console.log(anwesenheitenEinerWoche);
       const anwesenheitenMapFromAnwesenheitenEinerWoche =
         anwesenheitenEinerWoche.map((anwesenheit) => {
           const anwesenheitProTag: Anwesenheiten = {

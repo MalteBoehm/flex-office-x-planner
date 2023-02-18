@@ -42,13 +42,6 @@ export default function Table() {
     setDatumsbereichVonKalenderwoche(
       getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
     );
-    console.log(
-      "ausgewaehlteWoche",
-      ausgewaehlteWoche,
-      "ausgewaehltesJahr",
-      ausgewaehltesJahr,
-      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
-    );
   }, []);
 
   const [datumsbereichVonKalenderwoche, setDatumsbereichVonKalenderwoche] =

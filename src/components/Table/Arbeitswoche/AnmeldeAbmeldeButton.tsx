@@ -71,14 +71,6 @@ export default function AnmeldeAbmeldeButton(props: Props) {
     );
 
     if (isAbwesend) {
-      console.log(
-        "isAbwesend",
-        getDateForWeekdayInWeek(
-          props.tag.tag,
-          props.ausgewaehlteWoche,
-          props.ausgewaehltesJahr
-        )
-      );
       handleAnwesenheit(
         getDateForWeekdayInWeek(
           props.tag.tag,

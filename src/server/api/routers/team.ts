@@ -55,7 +55,6 @@ export const teamsRouter = createTRPCRouter({
       });
 
       if (!findMember) {
-        console.log("user not in team" + input);
         await ctx.prisma.teamMember.create({
           data: {
             id: ctx.session.user.id,

@@ -21,7 +21,6 @@ export const teamMemberRouter = createTRPCRouter({
         id: userId,
       },
     });
-    // console.log("teamMember", teamMember);
     return !!teamMember?.teamId;
   }),
   getUsersTeamName: protectedProcedure.query(async ({ ctx }) => {
@@ -33,7 +32,6 @@ export const teamMemberRouter = createTRPCRouter({
         where: { id: nutzer.teamId },
       });
 
-      console.log("nutzerTeam", nutzerTeam);
       if (!nutzerTeam) {
         return "Kein Team";
       } else {
