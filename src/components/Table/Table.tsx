@@ -8,6 +8,7 @@ import SignIn from "../SignIn";
 import TeamsSettingsView from "../TeamSettings/TeamsSettingsView";
 import { atom, useAtom } from "jotai";
 import Arbeitswoche from "./Arbeitswoche/Arbeitswoche";
+import { addWeeks, startOfISOWeekYear } from "date-fns";
 
 type Wochentag = "Montag" | "Dienstag" | "Mittwoch" | "Donnerstag" | "Freitag";
 export type ArbeitsWochenTag = {
@@ -210,17 +211,23 @@ export function getDateForWeekdayInWeek(
   ];
   const weekdayIndex = daysOfWeek.indexOf(weekday);
 
-  // Das `Date`-Objekt auf den 1. Januar des übergebenen Jahres setzen.
-  const date = new Date(year, 0, 1);
+  // Find the start of the ISO week year for the given year.
+  const startOfYear = new Date(Date.UTC(year, 0, 1));
+  const startOfISOWeekYearDate = startOfISOWeekYear(startOfYear);
 
-  // Die Woche des Jahres setzen (1-basiert).
-  date.setUTCDate(date.getUTCDate() + (week - 1) * 7);
+  // Calculate the date of the first occurrence of the desired weekday in the ISO
+  // week year. This is the start of the week for the given week number and year.
+  const startOfWeek = addWeeks(startOfISOWeekYearDate, week - 1);
+  while (startOfWeek.getUTCDay() !== weekdayIndex) {
+    startOfWeek.setUTCDate(startOfWeek.getUTCDate() + 1);
+  }
 
-  // Den Wochentag des Datums überprüfen. Falls er nicht mit dem gewünschten
-  // Wochentag übereinstimmt, wird das Datum entsprechend angepasst.
-  const currentWeekdayIndex = date.getUTCDay();
-  const daysUntilWeekday = (7 + weekdayIndex - currentWeekdayIndex) % 7;
-  date.setUTCDate(date.getUTCDate() + daysUntilWeekday);
-
-  return date;
+  // Return the resulting date object in UTC time zone.
+  return new Date(
+    Date.UTC(
+      startOfWeek.getUTCFullYear(),
+      startOfWeek.getUTCMonth(),
+      startOfWeek.getUTCDate()
+    )
+  );
 }
