@@ -1,5 +1,6 @@
 import { ArbeitsWochenTag } from "../Table";
 import AnmeldeAbmeldeButton from "./AnmeldeAbmeldeButton";
+import { useSession } from "next-auth/react";
 
 type Props = {
   getWeek: ArbeitsWochenTag[] | undefined;
@@ -8,6 +9,7 @@ type Props = {
   ausgewaehltesJahr: number;
 };
 export default function Arbeitswoche(props: Props) {
+  const { data: session } = useSession();
   return (
     <ul className="flex w-full flex-col justify-between md:-flex-row">
       {props.getWeek?.map((tag, i) => (
@@ -24,30 +26,57 @@ export default function Arbeitswoche(props: Props) {
                 ausgewaehltesJahr={props.ausgewaehltesJahr}
               />
             </div>
-            <div className="flex flex-row">
-              {tag.anwesendeMember?.map((member, index) => (
-                <span className="" key={index}>
-                  <p>
-                    {index > 0 && ","}
-                    {index > 0 && " "}
-                    {member?.name}
-                    {member?.day.getDay()}
-                  </p>
-                  {/*{member?.image && (*/}
-                  {/*  <Image*/}
-                  {/*    alt={member?.name ?? ""}*/}
-                  {/*    src={member?.image}*/}
-                  {/*    width={200}*/}
-                  {/*    height={200}*/}
-                  {/*    className="mr-2 h-10 w-10 rounded-full"*/}
-                  {/*  />*/}
-                  {/*)}*/}
-                </span>
-              ))}
+            <div className="flex flex-row gap-2">
+              {tag.anwesendeMember?.map((member, index) => {
+                // write a function, that returns a random tailwind color
+                const personStyle =
+                  "rounded-lg drop-shadow-lg p-2 " + getRandomTailwindColor();
+                return (
+                  <span key={index}>
+                    {member?.name !== session?.user?.name ? (
+                      <p className={personStyle}>{member?.name}</p>
+                    ) : (
+                      <p className=" rounded-lg bg-green-500/40 p-2 drop-shadow-lg">
+                        Ich
+                      </p>
+                    )}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </li>
       ))}
     </ul>
   );
+}
+
+function getRandomTailwindColor(): string {
+  const colors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500/40",
+    "bg-indigo-500",
+    "bg-purple-500/40",
+    "bg-orange-500/40",
+    "bg-pink-500",
+    "bg-teal-500/10",
+    "bg-cyan-500",
+    "bg-emerald-500/40",
+    "bg-rose-500",
+    "bg-fuchsia-500/40",
+    "bg-violet-500/40",
+    "bg-lime-500",
+    "bg-sky-500/40",
+    "bg-amber-500/40",
+    "bg-cool-gray-500/40",
+    "bg-true-gray-500/40",
+    "bg-warm-gray-500/40",
+    "bg-black-500/40",
+  ];
+
+  const randomIndex = Math.floor(Math.random() * colors.length);
+  const randomColor = colors[randomIndex];
+  return randomColor ?? getRandomTailwindColor();
 }

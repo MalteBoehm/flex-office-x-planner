@@ -17,23 +17,42 @@ export type ArbeitsWochenTag = {
 };
 
 const datumsbereichVonKalenderwocheAtom = atom("");
-export const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(new Date()));
-export const ausgewaehltesJahrAtom = atom<number>(new Date().getFullYear());
+export const dateAtom = atom<Date>(new Date());
+export const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(dateAtom.init));
+export const ausgewaehltesJahrAtom = atom<number>(
+  dateAtom.init.getUTCFullYear()
+);
 
 export default function Table() {
   const session = useSession();
+  const [date] = useAtom(dateAtom);
   const hasSession = session.status === "authenticated";
-  const date = new Date();
-  const currentWeek = getWeekNumber(date);
 
-  const [datumsbereichVonKalenderwoche, setDatumsbereichVonKalenderwoche] =
-    useAtom(datumsbereichVonKalenderwocheAtom);
+  const currentWeek = getWeekNumber(date);
   const [ausgewaehlteWoche, setAusgewaehlteWoche] = useAtom(
     ausgewaehlteWocheAtom
   );
   const [ausgewaehltesJahr, setAusgewaehltesJahr] = useAtom(
     ausgewaehltesJahrAtom
   );
+
+  useEffect(() => {
+    setAusgewaehlteWoche(currentWeek);
+    setAusgewaehltesJahr(date.getFullYear());
+    setDatumsbereichVonKalenderwoche(
+      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+    );
+    console.log(
+      "ausgewaehlteWoche",
+      ausgewaehlteWoche,
+      "ausgewaehltesJahr",
+      ausgewaehltesJahr,
+      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
+    );
+  }, []);
+
+  const [datumsbereichVonKalenderwoche, setDatumsbereichVonKalenderwoche] =
+    useAtom(datumsbereichVonKalenderwocheAtom);
 
   const {
     data: getWeek,
@@ -53,7 +72,7 @@ export default function Table() {
       );
     }
     if (ausgewaehlteWoche === 1) {
-      setAusgewaehlteWoche(ausgewaehltesJahr - 1);
+      setAusgewaehltesJahr(ausgewaehltesJahr - 1);
       setAusgewaehlteWoche(52);
       setDatumsbereichVonKalenderwoche(
         getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
@@ -73,14 +92,6 @@ export default function Table() {
       getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
     );
   }
-
-  useEffect(() => {
-    setAusgewaehlteWoche(currentWeek);
-    setAusgewaehltesJahr(date.getFullYear());
-    setDatumsbereichVonKalenderwoche(
-      getDatumsbereichVonKalenderwoche(ausgewaehlteWoche, ausgewaehltesJahr)
-    );
-  }, []);
 
   switch (hasSession) {
     case true:
@@ -180,14 +191,24 @@ export function getDatumsbereichVonKalenderwoche(
   jahr: number
 ): string {
   const tagDerWoche = 1; // 1 = Montag
-  const datum = new Date(jahr, 0, (tagDerWoche - 1) * 7 + 1);
-  const tagDesJahres = datum.getDay();
-  const tageBisZumMontag = tagDerWoche - tagDesJahres;
-  const tagImMonat =
-    datum.getDate() + tageBisZumMontag + (kalenderwoche - 1) * 7;
 
-  const startDatum = new Date(jahr, 0, tagImMonat);
-  const endDatum = new Date(jahr, 0, tagImMonat + 5);
+  // Find the date of January 1st of the given year.
+  const januarErster = new Date(jahr, 0, 1);
+
+  // Calculate the day of the week for January 1st.
+  const januarErsterTag = januarErster.getUTCDay();
+
+  // Find the date of the Monday in the same week as January 1st.
+  const montagDerWoche = new Date(jahr, 0, 1 - januarErsterTag + tagDerWoche);
+
+  // Add 7 days for each week beyond the first week to find the date of the Monday for the given week.
+  const mondayForWeekDate = new Date(
+    montagDerWoche.getTime() + (kalenderwoche - 1) * 7 * 24 * 60 * 60 * 1000
+  );
+
+  const startDatum = new Date(mondayForWeekDate);
+  const endDatum = new Date(startDatum);
+  endDatum.setDate(endDatum.getDate() + 4);
 
   const startTag = startDatum.getDate().toString().padStart(2, "0");
   const startMonat = (startDatum.getMonth() + 1).toString().padStart(2, "0");
@@ -211,7 +232,6 @@ export function getDateForWeekdayInWeek(
   ];
   const weekdayIndex = daysOfWeek.indexOf(weekday);
 
-  // Find the start of the ISO week year for the given year.
   const startOfYear = new Date(Date.UTC(year, 0, 1));
   const startOfISOWeekYearDate = startOfISOWeekYear(startOfYear);
 
@@ -225,7 +245,7 @@ export function getDateForWeekdayInWeek(
   // Return the resulting date object in UTC time zone.
   return new Date(
     Date.UTC(
-      startOfWeek.getUTCFullYear(),
+      startOfWeek.getUTCFullYear() + 1,
       startOfWeek.getUTCMonth(),
       startOfWeek.getUTCDate()
     )

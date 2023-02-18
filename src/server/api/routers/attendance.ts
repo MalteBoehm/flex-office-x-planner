@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { addDays, addWeeks, isSameDay, startOfWeek } from "date-fns";
+import {
+  addDays,
+  addMilliseconds,
+  addWeeks,
+  format,
+  isSameDay,
+  startOfWeek,
+} from "date-fns";
 
 import { mapWochenMitAnwesenheitenToWorkWeek } from "../../../components/Table/Table";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -50,17 +57,34 @@ export const anwesenheitenRouter = createTRPCRouter({
         (mitglied) => mitglied.id
       );
 
+      const timeZone = "Europe/Berlin"; // Replace with your desired timezone
+
       const mondayOfWeek = startOfWeek(new Date(Date.UTC(input.jahr, 0, 1)), {
         weekStartsOn: 1,
-      }); // Montag der ersten Kalenderwoche des Jahres
-      const desiredMonday = addWeeks(mondayOfWeek, input.woche); // Montag der gewünschten Kalenderwoche
-      const endeDerWoche = addDays(desiredMonday, 4);
+      }); // Monday of the first calendar week of the year
+      const desiredMonday = addWeeks(mondayOfWeek, input.woche); // Monday of the desired calendar week
 
+      // Adjust the date by the timezone offset
+      const adjustedMonday = addMilliseconds(
+        desiredMonday,
+        getTimezoneOffsetInMilliseconds(desiredMonday, timeZone)
+      );
+      const formattedAdjustedMonday = format(
+        adjustedMonday,
+        "yyyy-MM-dd HH:mm:ss"
+      );
+      const endeDerWoche = addDays(adjustedMonday, 5);
+      const formattedAdjustedEndOfWeek = format(
+        endeDerWoche,
+        "yyyy-MM-dd HH:mm:ss"
+      );
+      // console.log(adjustedMonday.toISOString());
+      // console.log(endeDerWoche.toISOString());
       const anwesenheitenEinerWoche = await ctx.prisma.attendance.findMany({
         where: {
           day: {
-            gte: desiredMonday,
-            lte: endeDerWoche,
+            gte: new Date(adjustedMonday),
+            lte: new Date(endeDerWoche),
           },
           teamMemberId: {
             in: teammitgliederIds,
@@ -70,7 +94,7 @@ export const anwesenheitenRouter = createTRPCRouter({
           teamMember: true,
         },
       });
-
+      console.log(anwesenheitenEinerWoche);
       const anwesenheitenMapFromAnwesenheitenEinerWoche =
         anwesenheitenEinerWoche.map((anwesenheit) => {
           const anwesenheitProTag: Anwesenheiten = {
@@ -91,7 +115,6 @@ export const anwesenheitenRouter = createTRPCRouter({
 
           return anwesenheitProTag;
         });
-
       return mapWochenMitAnwesenheitenToWorkWeek(
         anwesenheitenMapFromAnwesenheitenEinerWoche
       );
@@ -100,15 +123,13 @@ export const anwesenheitenRouter = createTRPCRouter({
     .input(z.object({ tag: z.string().datetime() }))
     .mutation(async ({ input, ctx }) => {
       const aktuellerBenutzer = ctx.session.user;
-      // check if attendance already exists for this day
       const anwesenheitExistiert = await ctx.prisma.attendance.findFirst({
         where: {
-          day: input.tag,
+          day: new Date(input.tag),
           teamMemberId: aktuellerBenutzer.id,
         },
       });
 
-      console.log(input.tag);
       if (!anwesenheitExistiert) {
         await ctx.prisma.attendance.create({
           data: {
@@ -140,3 +161,20 @@ export type TeamMember = z.infer<typeof TeamMember>;
 export type TeamMembers = z.infer<typeof TeamMembers>;
 export type Anwesenheiten = z.infer<typeof Anwesenheiten>;
 export type WocheMitAnwesenheiten = z.infer<typeof WocheMitAnwesenheiten>;
+
+function getTimezoneOffsetInMilliseconds(date: Date, timeZone: string) {
+  const dateWithTimeZone = new Date(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).format(date)
+  );
+
+  return dateWithTimeZone.getTimezoneOffset() * 60000;
+}

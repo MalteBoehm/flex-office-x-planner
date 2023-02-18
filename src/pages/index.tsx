@@ -27,6 +27,7 @@ export default Home;
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
   const [settingsOffen, setSettingsOffen] = useState(false);
+
   if (!sessionData) return <SignIn />;
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4 bg-amber-400 text-center">

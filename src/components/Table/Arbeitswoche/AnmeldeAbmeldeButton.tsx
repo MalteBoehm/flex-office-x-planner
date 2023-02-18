@@ -71,6 +71,14 @@ export default function AnmeldeAbmeldeButton(props: Props) {
     );
 
     if (isAbwesend) {
+      console.log(
+        "isAbwesend",
+        getDateForWeekdayInWeek(
+          props.tag.tag,
+          props.ausgewaehlteWoche,
+          props.ausgewaehltesJahr
+        )
+      );
       handleAnwesenheit(
         getDateForWeekdayInWeek(
           props.tag.tag,
@@ -88,15 +96,9 @@ export default function AnmeldeAbmeldeButton(props: Props) {
       handleAbmelden(anwesender.tagesId ?? "");
     }
   };
-  const dings = getDateForWeekdayInWeek(
-    props.tag.tag,
-    props.ausgewaehlteWoche,
-    props.ausgewaehltesJahr
-  );
   return (
     <button className={buttonStyle} onClick={handleClick}>
-      {!isAngemeldet ? "+" : "-"} {props.tag.tag}
-      {dings.getDay()}
+      {!isAngemeldet ? "+ Ich bin da!" : "- Ich kann doch nicht"}
     </button>
   );
 }
