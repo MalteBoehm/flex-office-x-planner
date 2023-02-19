@@ -1,4 +1,4 @@
-import { ArbeitsWochenTag } from "../Table";
+import type { ArbeitsWochenTag } from "../Table";
 import AnmeldeAbmeldeButton from "./AnmeldeAbmeldeButton";
 import { useSession } from "next-auth/react";
 

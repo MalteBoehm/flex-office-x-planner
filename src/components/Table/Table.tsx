@@ -22,6 +22,17 @@ export const ausgewaehlteWocheAtom = atom<number>(getWeekNumber(dateAtom.init));
 export const ausgewaehltesJahrAtom = atom<number>(
   dateAtom.init.getUTCFullYear()
 );
+// create a atom that uses ausgeaehlteWocheAtom and ausgewaehltesJahrAtom
+// to calculate the date range for the current week
+type Datumsbereich = {
+  week: number;
+  year: number;
+};
+export const zeitraumWocheJahr = atom<Datumsbereich>((get) => {
+  const currentWeek = get(ausgewaehlteWocheAtom);
+  const currentYear = get(ausgewaehltesJahrAtom);
+  return { week: currentWeek, year: currentYear };
+});
 
 export default function Table() {
   const session = useSession();

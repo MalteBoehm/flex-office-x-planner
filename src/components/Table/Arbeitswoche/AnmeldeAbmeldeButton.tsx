@@ -1,7 +1,9 @@
-import { ArbeitsWochenTag, getDateForWeekdayInWeek } from "../Table";
+import type { ArbeitsWochenTag } from "../Table";
+import { getDateForWeekdayInWeek, zeitraumWocheJahr } from "../Table";
 import { api } from "../../../utils/api";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 
 type Props = {
   tag: ArbeitsWochenTag;
@@ -13,6 +15,7 @@ type Props = {
 export default function AnmeldeAbmeldeButton(props: Props) {
   const [isAngemeldet, setIsAngemeldet] = useState(true);
   const { data: session } = useSession();
+  const [zeitraum] = useAtom(zeitraumWocheJahr);
   const anwesenheitenMutation = api.anwesenheiten.createAnwesenheit.useMutation(
     {
       async onSuccess() {
