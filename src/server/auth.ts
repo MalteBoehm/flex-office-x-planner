@@ -1,6 +1,5 @@
 import type { GetServerSidePropsContext } from "next";
-import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth";
-// import EmailProvider from "next-auth/providers/email";
+import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth"; // import EmailProvider from "next-auth/providers/email";
 // import GitHubProvider from "next-auth/providers/github";
 // import GoogleProvider from "next-auth/providers/google";
 // import { env } from "../env.mjs";
