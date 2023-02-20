@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@firebase/app': ^0.8.3
-  '@next-auth/firebase-adapter': ^1.0.1
+  '@next-auth/firebase-adapter': ^2.0.0
   '@prisma/client': ^4.9.0
   '@swc-jotai/react-refresh': ^0.0.4
   '@tanstack/react-query': ^4.20.0
@@ -21,10 +21,10 @@ specifiers:
   eslint: ^8.30.0
   eslint-config-next: 13.1.6
   firebase: ^9.17.1
-  firebase-admin: ^11.4.1
+  firebase-admin: ^11.5.0
   jotai: ^2.0.1
   next: 13.1.6
-  next-auth: ^4.19.0
+  next-auth: ^4.19.2
   nodemailer: ^6.9.1
   postcss: ^8.4.14
   prettier: ^2.8.1
@@ -39,7 +39,7 @@ specifiers:
 
 dependencies:
   '@firebase/app': 0.8.4
-  '@next-auth/firebase-adapter': 1.0.3_xnj3zcsnwepqfu4vk3bww7y2ie
+  '@next-auth/firebase-adapter': 2.0.0_vyuiwefdhcb2lqyqhzkm3hh62i
   '@prisma/client': 4.10.1_prisma@4.10.1
   '@tanstack/react-query': 4.24.4_biqbaboplfbrettd7655fr4n2y
   '@trpc/client': 10.10.0_@trpc+server@10.10.0
@@ -743,25 +743,25 @@ packages:
     dev: true
 
   /@jsdoc/salty/0.2.3:
-    resolution: {integrity: sha512-bbtCxCkxcnWhi50I+4Lj6mdz9w3pOXOgEQrID8TCZ/DF51fW7M9GCQW2y45SpBDdHd1Eirm1X/Cf6CkAAe8HPg==}
-    engines: {node: '>=v12.0.0'}
+    resolution: { integrity: sha512-bbtCxCkxcnWhi50I+4Lj6mdz9w3pOXOgEQrID8TCZ/DF51fW7M9GCQW2y45SpBDdHd1Eirm1X/Cf6CkAAe8HPg== }
+    engines: { node: '>=v12.0.0' }
     dependencies:
       lodash: 4.17.21
     dev: false
     optional: true
 
-  /@next-auth/firebase-adapter/1.0.3_xnj3zcsnwepqfu4vk3bww7y2ie:
-    resolution: {integrity: sha512-W4lfBwHhpygPfFZS9KCvWDqTyKpYBu4sqLopGgN2292/48jOX9WSSWDw9ZCg40rz8WJRBzaqRpFQ46XwDXJaxQ==}
+  /@next-auth/firebase-adapter/2.0.0_vyuiwefdhcb2lqyqhzkm3hh62i:
+    resolution: { integrity: sha512-Ps4AJZJvg4ue33GswJrlteDL5bFVyxgLuPHaTXhEONr3uXaTyYf93xaze5ceOa3vjlkEP9oLteFXPuz3wCPibg== }
     peerDependencies:
-      firebase: ^9.7.0
+      firebase-admin: ^11.4.1
       next-auth: ^4
     dependencies:
-      firebase: 9.17.1
+      firebase-admin: 11.5.0
       next-auth: 4.19.2_phzvn2nhb6zk7o4ds4z4gvqlei
     dev: false
 
   /@next/env/13.1.6:
-    resolution: {integrity: sha512-s+W9Fdqh5MFk6ECrbnVmmAOwxKQuhGMT7xXHrkYIBMBcTiOqNWhv5KbJIboKR5STXxNXl32hllnvKaffzFaWQg==}
+    resolution: { integrity: sha512-s+W9Fdqh5MFk6ECrbnVmmAOwxKQuhGMT7xXHrkYIBMBcTiOqNWhv5KbJIboKR5STXxNXl32hllnvKaffzFaWQg== }
     dev: false
 
   /@next/eslint-plugin-next/13.1.6:
@@ -901,20 +901,20 @@ packages:
     dev: true
 
   /@nodelib/fs.walk/1.2.8:
-    resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
-    engines: {node: '>= 8'}
+    resolution: { integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg== }
+    engines: { node: '>= 8' }
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
     dev: true
 
-  /@panva/hkdf/1.0.2:
-    resolution: {integrity: sha512-MSAs9t3Go7GUkMhpKC44T58DJ5KGk2vBo+h1cqQeqlMfdGkxaVB78ZWpv9gYi/g2fa4sopag9gJsNvS8XGgWJA==}
+  /@panva/hkdf/1.0.4:
+    resolution: { integrity: sha512-003xWiCuvePbLaPHT+CRuaV4GlyCAVm6XYSbBZDHoWZGn1mNkVKFaDbGJjjxmEFvizUwlCoM6O18FCBMMky2zQ== }
     dev: false
 
   /@pkgr/utils/2.3.1:
-    resolution: {integrity: sha512-wfzX8kc1PMyUILA+1Z/EqoE4UCXGy0iRGMhPwdfae1+f0OXlLqCk+By+aMzgJBzR9AzS4CDizioG6Ss1gvAFJw==}
-    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+    resolution: { integrity: sha512-wfzX8kc1PMyUILA+1Z/EqoE4UCXGy0iRGMhPwdfae1+f0OXlLqCk+By+aMzgJBzR9AzS4CDizioG6Ss1gvAFJw== }
+    engines: { node: ^12.20.0 || ^14.18.0 || >=16.0.0 }
     dependencies:
       cross-spawn: 7.0.3
       is-glob: 4.0.3
@@ -3355,15 +3355,15 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.20.13
-      '@panva/hkdf': 1.0.2
+      '@panva/hkdf': 1.0.4
       cookie: 0.5.0
       jose: 4.11.4
       next: 13.1.6_biqbaboplfbrettd7655fr4n2y
       nodemailer: 6.9.1
       oauth: 0.9.15
       openid-client: 5.4.0
-      preact: 10.12.0
-      preact-render-to-string: 5.2.6_preact@10.12.0
+      preact: 10.12.1
+      preact-render-to-string: 5.2.6_preact@10.12.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       uuid: 8.3.2
@@ -3729,27 +3729,27 @@ packages:
       source-map-js: 1.0.2
     dev: true
 
-  /preact-render-to-string/5.2.6_preact@10.12.0:
-    resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
+  /preact-render-to-string/5.2.6_preact@10.12.1:
+    resolution: { integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw== }
     peerDependencies:
       preact: '>=10'
     dependencies:
-      preact: 10.12.0
+      preact: 10.12.1
       pretty-format: 3.8.0
     dev: false
 
-  /preact/10.12.0:
-    resolution: {integrity: sha512-+w8ix+huD8CNZemheC53IPjMUFk921i02o30u0K6h53spMX41y/QhVDnG/nU2k42/69tvqWmVsgNLIiwRAcmxg==}
+  /preact/10.12.1:
+    resolution: { integrity: sha512-l8386ixSsBdbreOAkqtrwqHwdvR35ID8c3rKPa8lCWuO86dBi32QWHV4vfsZK1utLLFMvw+Z5Ad4XLkZzchscg== }
     dev: false
 
   /prelude-ls/1.1.2:
-    resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
-    engines: {node: '>= 0.8.0'}
+    resolution: { integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w== }
+    engines: { node: '>= 0.8.0' }
     dev: false
     optional: true
 
   /prelude-ls/1.2.1:
-    resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
+    resolution: { integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g== }
     engines: {node: '>= 0.8.0'}
     dev: true
 

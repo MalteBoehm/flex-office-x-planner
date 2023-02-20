@@ -1,10 +1,10 @@
-import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import type { GetServerSidePropsContext } from "next";
 import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import GitHubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
-import { env } from "../env.mjs";
+// import EmailProvider from "next-auth/providers/email";
+// import GitHubProvider from "next-auth/providers/github";
+// import GoogleProvider from "next-auth/providers/google";
+// import { env } from "../env.mjs";
+import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import { firebaseConfig } from "../firebase";
 
 /**
@@ -49,25 +49,29 @@ export const authOptions: NextAuthOptions = {
   adapter: FirestoreAdapter(firebaseConfig),
 
   providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_ID,
-      clientSecret: env.GOOGLE_SECRET,
-    }),
-    GitHubProvider({
-      clientId: env.GITHUB_ID,
-      clientSecret: env.GITHUB_SECRET,
-    }),
-    EmailProvider({
-      server: {
-        host: env.EMAIL_SERVER_HOST,
-        port: env.EMAIL_SERVER_PORT,
-        auth: {
-          user: env.EMAIL_SERVER_USER,
-          pass: env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-    }),
+    // GoogleProvider({
+    //   clientId: env.GOOGLE_ID,
+    //   clientSecret: env.GOOGLE_SECRET,
+    // }),
+    // GitHubProvider({
+    //   clientId: env.GITHUB_ID,
+    //   clientSecret: env.GITHUB_SECRET,
+    // }),
+    // EmailProvider({
+    //   server: {
+    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //     host: env.EMAIL_SERVER_HOST,
+    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //     port: env.EMAIL_SERVER_PORT,
+    //     auth: {
+    //       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //       user: env.EMAIL_SERVER_USER,
+    //       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //       pass: env.EMAIL_SERVER_PASSWORD,
+    //     },
+    //   },
+    //   from: process.env.EMAIL_FROM,
+    // }),
   ],
 };
 
